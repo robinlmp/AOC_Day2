@@ -7,23 +7,59 @@
 
 import SwiftUI
 
+let example = """
+forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2
+"""
+// answer for this should be 900
+
 struct ContentView: View {
     var body: some View {
-        Text("Text")
-            .onAppear {
-                print("\(loadFile(fileName: "input-2") ?? [""])")
-            }
+        Text("\(directionAndDistanceTotals(fileName: "input-2"))")
     }
     
-    func loadFile(fileName: String) -> [String]? {
+    func loadFile(fileName: String) -> String? {
         guard let filepath = Bundle.main.path(forResource: fileName, ofType: "txt"),
               let contents = try? String(contentsOfFile: filepath) else { return nil }
-        
-        let returnArray = contents.components(separatedBy: "\n").filter { $0 != "" }
-        
-        print(returnArray.count)
-        return returnArray
+        return contents
     }
+    
+    func processFile(contents: String) -> [String] {
+        return contents.components(separatedBy: "\n").filter { $0 != "" }
+    }
+    
+    func directionAndDistanceTotals(fileName: String) -> Int {
+        guard let contents = loadFile(fileName: fileName) else { return 0}
+        let movements = processFile(contents: contents)
+
+        var x = 0
+        var y = 0
+        var aim = 0
+
+        for move in movements {
+            guard let processedMove = splitString(input: move) else { continue }
+            if processedMove.0 == "forward" {
+                x += processedMove.1
+                y += processedMove.1 * aim
+            } else if processedMove.0 == "up" || processedMove.0 == "down" {
+                aim += processedMove.1
+            }
+        }
+        print(x * y)
+        return x * y
+    }
+    
+    func splitString(input: String) -> (String, Int)? {
+        let components = input.components(separatedBy: " ")
+        guard var distance = Int(components[1]) else { return nil }
+        if components[0].hasPrefix("u") || components[0].hasPrefix("U") { distance = 0 - distance }
+        return (components[0], distance)
+    }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
