@@ -17,9 +17,14 @@ forward 2
 """
 // answer for this should be 900
 
+enum Part {
+    case part1, part2
+}
+
 struct ContentView: View {
     var body: some View {
-        Text("\(directionAndDistanceTotals(fileName: "input-2"))")
+        Text("Part 1 = \(directionAndDistanceTotals(fileName: "input-2", part: .part1))")
+        Text("Part 2 = \(directionAndDistanceTotals(fileName: "input-2", part: .part2))")
     }
     
     func loadFile(fileName: String) -> String? {
@@ -32,7 +37,7 @@ struct ContentView: View {
         return contents.components(separatedBy: "\n").filter { $0 != "" }
     }
     
-    func directionAndDistanceTotals(fileName: String) -> Int {
+    func directionAndDistanceTotals(fileName: String, part: Part) -> Int {
         guard let contents = loadFile(fileName: fileName) else { return 0}
         let movements = processFile(contents: contents)
 
@@ -44,9 +49,15 @@ struct ContentView: View {
             guard let processedMove = splitString(input: move) else { continue }
             if processedMove.0 == "forward" {
                 x += processedMove.1
-                y += processedMove.1 * aim
+                if part == .part2 { y += processedMove.1 * aim }
             } else if processedMove.0 == "up" || processedMove.0 == "down" {
-                aim += processedMove.1
+                switch part {
+                case .part1:
+                    y += processedMove.1
+                case .part2:
+                    aim += processedMove.1
+                }
+                
             }
         }
         print(x * y)
